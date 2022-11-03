@@ -1,9 +1,7 @@
 package com.udacity.catpoint;
 
-import com.udacity.catpoint.image.service.FakeImageService;
 import com.udacity.catpoint.image.service.ImageService;
 import com.udacity.catpoint.security.data.*;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.*;
@@ -22,7 +20,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CatpointAppTests {
+public class SecurityServiceTest {
     @Mock
     private SecurityRepository securityRepository;
     @Mock
@@ -190,9 +188,24 @@ public class CatpointAppTests {
             case ARMED_HOME:
                 assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
         }
+
+        // cover the case where the system is armed while a cat is detected.
+        securityService.setAlarmStatus(AlarmStatus.NO_ALARM);
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+        securityService.setArmingStatus(armingStatus);
+
+        // expect ALARM status if the system is armed.
+        switch(armingStatus) {
+            case DISARMED:
+            case ARMED_AWAY:
+                assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
+                break;
+            case ARMED_HOME:
+                assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+        }
     }
 
-    @DisplayName("Test 8: If a cat is detected while Armed-Home sound the alarm")
+    @DisplayName("Test 8: If a cat is not detected while Armed-Home do not sound the alarm")
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 , 3})
     public void changeSensorActivationStatus_8CatNotDetectedWhileArmedHome_AlarmStatus(int countArmedSensors) {
@@ -208,6 +221,9 @@ public class CatpointAppTests {
         case 0:
             // do nothing
 }
+        // cover the removal of a sensor
+        securityService.removeSensor(sensor3);
+
         when(imageService.imageContainsCat(any(),anyFloat())).thenReturn(false);
         securityService.processImage(bufferedImage);
 

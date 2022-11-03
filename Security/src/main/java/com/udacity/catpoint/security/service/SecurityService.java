@@ -34,9 +34,6 @@ public class SecurityService {
         this.imageService = imageService;
 
         sensors = securityRepository.getSensors();
-        if(sensors == null) {
-            sensors = new TreeSet<>();
-        }
 
         alarmStatus = securityRepository.getAlarmStatus();
         if(alarmStatus == null){
